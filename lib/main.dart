@@ -91,15 +91,132 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
         toplamKredi += dersler[i].dersCredit!;
         toplamMultip += dersler[i].dersCredit! * dersler[i].takdirDersGrade!;
         donemOrt = toplamMultip / toplamKredi;
+
+        print(belge.toString());
+        //BELGE HESAPLAMA
+
+      }
+      if (term == "Genel") {
+        try {
+          genelOrt = double.parse(GenelNotOrtalamasiController.text);
+        } catch (e) {
+          genelOrt = 0;
+        }
+        try {
+          genelKredi = int.parse(TamamlananKrediController.text);
+        } catch (e) {
+          genelKredi = 0;
+        }
+        genelOrt = ((genelOrt * genelKredi) + toplamMultip) /
+            (genelKredi + toplamKredi);
       }
     });
-    if (term == "Genel") {
-      genelOrt = double.parse(GenelNotOrtalamasiController.text);
-      genelKredi = int.parse(TamamlananKrediController.text);
+  }
 
-      genelOrt =
-          ((genelOrt * genelKredi) + toplamMultip) / (genelKredi + toplamKredi);
-    }
+  bool belge = true;
+
+  void BelgeHesapla() {
+    setState(() {
+      // try {
+      //   if (dersler[i].dersGrade! < 50 && dersler[i].dersGrade != null) {
+      //     canTake = false;
+      //     print(dersler[i].dersGrade);
+      //   }
+      // } catch (e) {
+      //   return;
+      // }
+      bool canTake = true;
+      int x = 0;
+      for (int i = 0; i < dersler.length; i++) {
+        print(x);
+        print(dersler[i].TakdirDersGradeController?.text);
+        print("HEREE");
+        x++;
+        double dersNotu = 0;
+        try {
+          dersNotu = double.parse(dersler[i].TakdirDersGradeController!.text);
+        } catch (e) {
+          showDialog<String>(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              title: const Text('Dikkat!'),
+              content: const Text('Bilgileri Gözden Geçiriniz!'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'Tamam'),
+                  child: const Text('Tamam'),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
+        if (dersNotu < 50) {
+          canTake = false;
+          print(dersler[i].dersGrade);
+        }
+      }
+      if (canTake) {
+        belge = true;
+      } else {
+        belge = false;
+      }
+
+      if (term == "Genel") {
+        showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: (belge && donemOrt >= 70)
+                ? const Text(
+                    '!!Tebrikler!!',
+                    textAlign: TextAlign.center,
+                  )
+                : const Text('Üzgünüz'),
+            content: (belge && donemOrt >= 85)
+                ? const Text(
+                    '\nTakdir Belgesi Aldınız!',
+                    textAlign: TextAlign.center,
+                  )
+                : (belge && donemOrt >= 70 && donemOrt < 85)
+                    ? const Text(
+                        'Teşekkür Belgesi Aldınız',
+                        textAlign: TextAlign.center,
+                      )
+                    : const Text(
+                        '\nBelge Alamadınız :(',
+                        textAlign: TextAlign.center,
+                      ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'Tamam'),
+                child: const Text('Tamam'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: (belge && donemOrt >= 70)
+                ? const Text('Tebrikler')
+                : const Text('Üzgünüz'),
+            content: (belge && donemOrt >= 85)
+                ? const Text('Takdir Belgesi Aldınız!')
+                : (belge && donemOrt >= 70 && donemOrt < 85)
+                    ? const Text('Teşekkür Belgesi Aldınız')
+                    : const Text('Belge Alamadınız :('),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'Tamam'),
+                child: const Text('Tamam'),
+              ),
+            ],
+          ),
+        );
+      }
+    });
+    print(belge.toString());
   }
 
   @override
@@ -108,9 +225,9 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
       child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomRight,
-            colors: [Colors.blueGrey, Colors.grey],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [Colors.redAccent, Colors.greenAccent],
           ),
         ),
         child: Scaffold(
@@ -184,8 +301,8 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                   onChanged: (newVal) {
                                     setState(() {
                                       dersSayisi = newVal!;
-                                      if (dersSayisi > dersler.length) {
-                                        for (int i = dersler.length - 1;
+                                      if (dersSayisi > dersler.length - 1) {
+                                        for (int i = dersler.length;
                                             i < dersSayisi;
                                             i++) {
                                           dersler.add(Ders(
@@ -256,32 +373,76 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                   ),
                 ),
                 term == "Genel"
-                    ? Container(
-                        child: Row(
-                          children: [
-                            //Tamamlanan Kredi
-                            Container(
-                              child: Expanded(
-                                child: ListTile(
-                                  leading: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: Colors.white60,
-                                    ),
-                                    padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                    child: const Text(
-                                      'Önceki Dönem\nHaftalık Ders Saati',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(),
-                                    ),
+                    ? Row(
+                        children: [
+                          //Tamamlanan Kredi
+                          Container(
+                            child: Expanded(
+                              child: ListTile(
+                                leading: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.white60,
                                   ),
-                                  title: TextField(
-                                    style: TextStyle(color: Colors.white),
-                                    cursorColor: Colors.white,
+                                  padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                  child: const Text(
+                                    'Önceki Dönem\nHaftalık Ders Saati',
                                     textAlign: TextAlign.center,
-                                    keyboardType: TextInputType.number,
-                                    controller: TamamlananKrediController,
-                                    decoration: const InputDecoration(
+                                    style: TextStyle(),
+                                  ),
+                                ),
+                                title: TextField(
+                                  style: TextStyle(color: Colors.white),
+                                  cursorColor: Colors.white,
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                  controller: TamamlananKrediController,
+                                  decoration: const InputDecoration(
+                                    hintStyle: TextStyle(color: Colors.white38),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.cyan),
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.redAccent),
+                                    ),
+                                    hintText: "20",
+                                  ),
+                                  onChanged: (_) {
+                                    setState(() {
+                                      Hesapla();
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          //Genel Not Ortalaması
+                          Container(
+                            child: Expanded(
+                              child: ListTile(
+                                leading: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.white60,
+                                  ),
+                                  padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                  child: const Text(
+                                    'Önceki Dönem\nNot Ortalaması',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                title: TextField(
+                                  style: TextStyle(color: Colors.white),
+                                  cursorColor: Colors.white,
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                  controller: GenelNotOrtalamasiController,
+                                  decoration: const InputDecoration(
                                       hintStyle:
                                           TextStyle(color: Colors.white38),
                                       enabledBorder: UnderlineInputBorder(
@@ -292,64 +453,17 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                         borderSide:
                                             BorderSide(color: Colors.redAccent),
                                       ),
-                                      hintText: "20",
-                                    ),
-                                    onChanged: (_) {
-                                      setState(() {
-                                        Hesapla();
-                                      });
-                                    },
-                                  ),
+                                      hintText: "84.22"),
+                                  onChanged: (_) {
+                                    setState(() {
+                                      Hesapla();
+                                    });
+                                  },
                                 ),
                               ),
                             ),
-                            //Genel Not Ortalaması
-                            Container(
-                              child: Expanded(
-                                child: ListTile(
-                                  leading: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: Colors.white60,
-                                    ),
-                                    padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                    child: const Text(
-                                      'Önceki Dönem\nNot Ortalaması',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  title: TextField(
-                                    style: TextStyle(color: Colors.white),
-                                    cursorColor: Colors.white,
-                                    textAlign: TextAlign.center,
-                                    keyboardType: TextInputType.number,
-                                    controller: GenelNotOrtalamasiController,
-                                    decoration: const InputDecoration(
-                                        hintStyle:
-                                            TextStyle(color: Colors.white38),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide:
-                                              BorderSide(color: Colors.cyan),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: Colors.redAccent),
-                                        ),
-                                        hintText: "84.22"),
-                                    onChanged: (_) {
-                                      setState(() {
-                                        Hesapla();
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       )
                     : Container(),
                 SizedBox(
@@ -361,6 +475,63 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                   indent: 18,
                   endIndent: 18,
                 ),
+
+                Container(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: Colors.yellowAccent,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text('Ders Adı'),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: Colors.orangeAccent,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Ders Saati",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: Colors.deepOrange,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text("Ders Notu"),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(''),
+                      )
+                    ],
+                  ),
+                ),
+
                 //Dersler---Büyük widget
                 Container(
                   child: Expanded(
@@ -378,12 +549,14 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5),
-                                    color: Colors.redAccent.withOpacity(0.2),
+                                    color: Colors.yellowAccent,
                                   ),
                                   child: TextField(
                                     textAlign: TextAlign.center,
                                     decoration: InputDecoration(
                                       hintText: "Ders ${index + 1}",
+                                      hintStyle:
+                                          TextStyle(color: Colors.blueGrey),
                                       border: InputBorder.none,
                                     ),
                                   ),
@@ -396,8 +569,9 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: Colors.red.withOpacity(0.4)),
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.orangeAccent,
+                                  ),
                                   child: TextField(
                                     keyboardType: TextInputType.number,
                                     inputFormatters: <TextInputFormatter>[
@@ -435,10 +609,14 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                       });
                                     },
                                     onTap: () {
-                                      Hesapla();
+                                      setState(() {
+                                        Hesapla();
+                                      });
                                     },
                                     onEditingComplete: () {
-                                      Hesapla();
+                                      setState(() {
+                                        Hesapla();
+                                      });
                                     },
                                   ),
                                 ),
@@ -451,7 +629,7 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(5),
-                                    color: Colors.redAccent.withOpacity(0.7),
+                                    color: Colors.deepOrange,
                                   ),
                                   alignment: Alignment.center,
                                   child: TextField(
@@ -492,10 +670,14 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                       );
                                     },
                                     onTap: () {
-                                      Hesapla();
+                                      setState(() {
+                                        Hesapla();
+                                      });
                                     },
                                     onEditingComplete: () {
-                                      Hesapla();
+                                      setState(() {
+                                        Hesapla();
+                                      });
                                     },
                                   ),
                                 ),
@@ -506,7 +688,7 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                               child: IconButton(
                                 icon: const Icon(
                                   Icons.delete,
-                                  color: Colors.red,
+                                  color: Colors.cyanAccent,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -523,25 +705,52 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                     ),
                   ),
                 ),
+
                 //Hesaplanan Genel Not Ortalaması
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.redAccent.withOpacity(0.9),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.redAccent.withOpacity(0.9),
+                          ),
+                          height: 50,
+                          child: Text(
+                            term == "Dönem"
+                                ? "Dönem Not Ortalaması: ${donemOrt.isNaN ? "0.0" : donemOrt.toStringAsFixed(2)}"
+                                : "Dönem Not Ortalaması: ${donemOrt.isNaN ? "0.0" : donemOrt.toStringAsFixed(2)} \nYıl Sonu Not Ortalaması: ${genelOrt.isNaN ? "0.0" : genelOrt.toStringAsFixed(2)}",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
                     ),
-                    width: double.infinity,
-                    height: 50,
-                    child: Text(
-                      term == "Dönem"
-                          ? "Dönem Not Ortalaması: ${donemOrt.isNaN ? "0.0" : donemOrt.toStringAsFixed(2)}"
-                          : "Dönem Not Ortalaması: ${donemOrt.isNaN ? "0.0" : donemOrt.toStringAsFixed(2)} \nGenel Not Ortalaması: ${genelOrt.toStringAsFixed(2)}",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white),
+                    Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Colors.cyanAccent.withOpacity(0.9),
+                          ),
+                          child: TextButton(
+                            child: Text(
+                              'Belge Gör',
+                              style: TextStyle(
+                                color: Colors.black87,
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                BelgeHesapla();
+                              });
+                            },
+                          )),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
