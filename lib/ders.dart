@@ -7,6 +7,7 @@ class Ders {
   double? takdirDersGrade = 0.0;
   TextEditingController? dersCreditController = TextEditingController();
   TextEditingController? TakdirDersGradeController = TextEditingController();
+  TextEditingController? dersNameController = TextEditingController();
 
   Ders(
       {this.dersName,

@@ -559,6 +559,25 @@ class _TakdirHomePageState extends State<TakdirHomePage> {
                                           TextStyle(color: Colors.blueGrey),
                                       border: InputBorder.none,
                                     ),
+                                    controller:
+                                        dersler[index].dersNameController,
+                                    onChanged: (_) {
+                                      setState(() {
+                                        if (dersler[index]
+                                                    .dersNameController
+                                                    ?.text !=
+                                                "" ||
+                                            dersler[index]
+                                                    .dersNameController
+                                                    ?.text !=
+                                                null) {
+                                          dersler[index].dersName =
+                                              dersler[index]
+                                                  .dersNameController
+                                                  ?.text;
+                                        }
+                                      });
+                                    },
                                   ),
                                 ),
                               ),
